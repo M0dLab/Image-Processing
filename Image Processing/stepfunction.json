@@ -1,0 +1,35 @@
+{
+  "Comment": "Image Processing Workflow",
+  "StartAt": "ResizeImage",
+  "States": {
+    "ResizeImage": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:424926559699:function:resize-image-lambda",
+      "ResultPath": "$.result",
+      "Parameters": {
+        "sourceBucket.$": "$.sourceBucket",
+        "imageKey.$": "$.imageKey"
+      },
+      "Next": "CheckResult"
+    },
+    "CheckResult": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.result.message",
+          "StringEquals": "Image resized successfully!",
+          "Next": "SuccessState"
+        }
+      ],
+      "Default": "FailState"
+    },
+    "SuccessState": {
+      "Type": "Succeed"
+    },
+    "FailState": {
+      "Type": "Fail",
+      "Error": "ResizeFailed",
+      "Cause": "Image did not resize properly"
+    }
+  }
+}
